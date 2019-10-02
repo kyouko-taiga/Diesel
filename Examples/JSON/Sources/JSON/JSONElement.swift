@@ -1,7 +1,7 @@
 enum JSONElement {
 
   case null
-  case number(Int)
+  case number(Double)
   case string(String)
   case list([JSONElement])
   case object([JSONObjectElement])

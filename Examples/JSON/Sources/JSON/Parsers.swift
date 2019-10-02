@@ -1,31 +1,19 @@
 import Diesel
 
-struct CharacterParser: Parser {
-
-  let character: Character
-
-  init(_ character: Character) {
-    self.character = character
-  }
-
-  func parse(_ stream: Substring) -> ParseResult<Character, Substring> {
-    guard stream.first == character
-      else { return .error() }
-    return .success(character, stream.dropFirst())
-  }
-
+func character(_ character: Character) -> ElementParser<Substring> {
+  return parser(of: character, in: Substring.self)
 }
 
 enum JSONParser {
 
   // MARK: Basic tokens
 
-  static let leftBrace     = CharacterParser("{")
-  static let rightBrace    = CharacterParser("}")
-  static let leftBracket   = CharacterParser("[")
-  static let rightBracket  = CharacterParser("]")
-  static let colon         = CharacterParser(":")
-  static let comma         = CharacterParser(",")
+  static let leftBrace     = character("{")
+  static let rightBrace    = character("}")
+  static let leftBracket   = character("[")
+  static let rightBracket  = character("]")
+  static let colon         = character(":")
+  static let comma         = character(",")
   static let whitespace    = AnyParser<Character, Substring> { stream in
     guard let character = stream.first, character.isWhitespace
       else { return .error() }
@@ -42,31 +30,15 @@ enum JSONParser {
 
   private(set) static var jsonElement = ForwardParser<JSONElement, Substring>()
 
-  static let null = AnyParser<JSONElement, Substring> { stream in
-    guard stream.starts(with: "null")
-      else { return .error() }
-    return .success(.null, stream.dropFirst(4))
-  }
+  static let null = parser(of: "null", in: Substring.self).map { _ -> JSONElement in .null }
 
-  static let positiveNumber = AnyParser<Int, Substring> { stream in
-    let characters = stream.prefix(while: { $0.isNumber })
-    return characters.isEmpty
-      ? .error()
-      : .success(Int(String(characters))!, stream.dropFirst(characters.count))
-  }
+  static let number = parser(matching: "-?(?:0|[1-9][0-9]*)(?:\\.[0-9]*)?")
+    .map { value -> JSONElement in .number(Double(value)!) }
 
-  static let number = CharacterParser("-").optional
-    .then(positiveNumber) { (minusSign, number) -> JSONElement in
-      .number(minusSign.map { _ in -number } ?? number)
-    }
+  private static let stringLiteral = parser(matching: "\"[^\"]*\"")
+    .map { $0.dropFirst().dropLast() }
 
-  private static let stringContent = AnyParser<String, Substring> { stream in
-    let characters = stream.prefix(while: { $0 != "\"" })
-    return .success(String(characters), stream.dropFirst(characters.count))
-  }
-
-  static let string = stringContent.surrounded(by: CharacterParser("\""))
-    .map { value -> JSONElement in .string(value) }
+  static let string = stringLiteral.map { value -> JSONElement in .string(String(value)) }
 
   private static let listContent = jsonElement
     .then(comma.surrounded(by: whitespace.many)
@@ -78,9 +50,9 @@ enum JSONParser {
     .then(listContent.optional.surrounded(by: whitespace.many)) { _, rhs in rhs ?? [] }
     .then(rightBracket) { (lhs, _) -> JSONElement in .list(lhs) }
 
-  private static let objectElement = stringContent.surrounded(by: CharacterParser("\""))
+  private static let objectElement = stringLiteral
     .then(colon.surrounded(by: whitespace.many)) { lhs, _ in lhs }
-    .then(jsonElement) { lhs, rhs in JSONObjectElement(key: lhs, value: rhs) }
+    .then(jsonElement) { lhs, rhs in JSONObjectElement(key: String(lhs), value: rhs) }
 
   private static let objectContent = objectElement
     .then(comma.surrounded(by: whitespace.many)

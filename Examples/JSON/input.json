@@ -2,6 +2,8 @@
   "menu": {
     "id": "file",
     "value": "File",
+    "score": 1.312,
+    "listener": null,
     "popup": {
       "menuitem": [
         { "value": "New", "onclick": "CreateNewDoc()" },
