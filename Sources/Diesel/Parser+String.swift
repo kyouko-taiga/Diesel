@@ -1,7 +1,0 @@
-extension Parser where Stream == Substring {
-
-  public func parse(_ string: String) -> ParseResult<Element, Substring> {
-    return parse(Stream(string))
-  }
-
-}

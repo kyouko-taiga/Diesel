@@ -1,3 +1,5 @@
+import Foundation
+
 /// A parser that parses one specific element at the beginning of the stream.
 public struct ElementParser<Stream>: Parser
   where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream
@@ -109,4 +111,59 @@ public func parser<Stream, C>(
         C: Collection, C.Element == Stream.Element
 {
   return SequenceParser(sequence, onFailure: onFailure)
+}
+
+// MARK: String specific extensions
+
+/// A parser that parses regular expressions at the beginning of a substring.
+public struct RegularExpressionParser: Parser {
+
+  public typealias Element = Substring
+
+  private let pattern: String
+  private let onFailure: (Substring) -> Any?
+
+  public init(_ pattern: String, onFailure: @escaping (Substring) -> Any?) {
+    self.pattern = pattern
+    self.onFailure = onFailure
+  }
+
+  public func parse(_ stream: Substring) -> ParseResult<Substring, Substring> {
+    guard let range = stream.range(of: pattern, options: .regularExpression)
+      else { return .error(diagnostic: onFailure(stream)) }
+    guard range.lowerBound == stream.startIndex
+      else { return .error(diagnostic: onFailure(stream)) }
+
+    let count = stream.distance(from: range.lowerBound, to: range.upperBound)
+    return .success(stream[range], stream.dropFirst(count))
+  }
+
+}
+
+/// Creates a parser that parses regular expressions at the beginning of a substring.
+///
+/// - Parameter pattern: The pattern to match, at the beginning of the stream.
+/// - Returns: A regular expression parser.
+public func parser(matching pattern: String) -> RegularExpressionParser {
+  return RegularExpressionParser(pattern) { _ in nil }
+}
+
+/// Creates a parser that parses regular expressions at the beginning of a substring.
+///
+/// - Parameters:
+///   - pattern: The pattern to match, at the beginning of the stream.
+///   - onFailure: A function that is called when the parser fails to produce a diagnostic.
+/// - Returns: A regular expression parser.
+public func parser(matching pattern: String, onFailure: @escaping (Substring) -> Any?)
+  -> RegularExpressionParser
+{
+  return RegularExpressionParser(pattern, onFailure: onFailure)
+}
+
+extension Parser where Stream == Substring {
+
+  public func parse(_ string: String) -> ParseResult<Element, Substring> {
+    return parse(Substring(string))
+  }
+
 }
