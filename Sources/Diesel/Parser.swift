@@ -1,26 +1,27 @@
 /// A type that implements a parser.
 ///
-/// A parser is a function of the form `(Stream) -> (Element, Stream) | Error` that attempts to
-/// extract a valid output out a a given stream. If it succeeds, it returns said output, together
-/// with an "updated" stream, corresponding to the remainder of the input. If it fails, it simply
-/// returns an error.
+/// A parser can be understood as a function of the form `(Stream) -> (Element, Stream) | Error`
+/// that attempts to extract a valid output out a a given stream. If it succeeds, it returns said
+/// output, together with an "updated" stream, corresponding to the remainder of the input. If it
+/// fails, it simply returns an error.
 ///
 /// For example, consider the task of reading a single digit out of a character string. Such a
-/// parser could be implemented as a function `(String) -> (Character, String) | Error` that either
-/// successfully reads a digit from the beginning of the string, or just fails. In more concrete
-/// terms, it could be wrote as follows:
+/// parser could be implemented as a function `(String) -> (Character, String) | Error`, that
+/// either successfully reads a digit from the beginning of the string, or just fails. In more
+/// concrete terms, it could be wrote as follows:
 ///
 ///     func parseDigit(from string: String) -> ParseResult<Character, String> {
 ///       guard let character = string.first, character.isNumber
-///         else { return .failure(ParseError()) }
+///         else { return .error() }
 ///       return .success(character, String(string.dropFirst()))
 ///     }
 ///
 /// One advantage of this approach is that is that parsers (i.e. parsing functions) can be
 /// *combined* to create other parsers. For example, one could create a parser for two-digit
-/// numbers by combination of the above function. Note however that such a combination does not
-/// simply boils down to function composition, as one has to care for cases in which the first
-/// application does not succeeds, which unfertunately leads significant boilerplate.
+/// numbers by reusing the above function twice, feeding the result of its first application to a
+/// second one. Note however that such a combination does not simply boils down to function
+/// composition, as one has to care for cases in which the first application does not succeeds,
+/// which unfertunately leads significant boilerplate.
 ///
 /// The `Parser` protocol defines an interface for types that represent such parsing functions, and
 /// provides so-called "combinators" to combine them and form more complex parsers. For example,
