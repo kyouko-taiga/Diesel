@@ -68,13 +68,13 @@ public struct SequenceParser<Stream, C>: Parser
 
   public init(_ sequence: C, onFailure: @escaping (Stream) -> Any?) {
     self.sequence = sequence
-    self.onFailure = { _ in nil }
+    self.onFailure = onFailure
   }
 
   public func parse(_ stream: Stream) -> ParseResult<C, Stream> {
     guard stream.starts(with: sequence)
       else { return .error(diagnostic: onFailure(stream)) }
-    return .success(sequence, stream.dropLast(sequence.count))
+    return .success(sequence, stream.dropFirst(sequence.count))
   }
 
 }
