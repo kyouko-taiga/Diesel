@@ -23,9 +23,14 @@ public struct ElementParser<Stream>: Parser
 
 /// Creates a parser that parses one specific element at the beginning of the stream.
 ///
-/// - Parameter element: The element to parse.
+/// - Parameters:
+///   - element: The element to parse.
+///   - streamType: The type of the stream that the returned parser should consume.
 /// - Returns: An element parser.
-public func parse<Stream>(exactly element: Stream.Element) -> ElementParser<Stream>
+public func parser<Stream>(
+  of element: Stream.Element,
+  in streamType: Stream.Type = Stream.self)
+  -> ElementParser<Stream>
   where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream
 {
   return ElementParser(element, onFailure: { _ in nil })
@@ -35,11 +40,14 @@ public func parse<Stream>(exactly element: Stream.Element) -> ElementParser<Stre
 ///
 /// - Parameters:
 ///   - element: The element to parse.
+///   - streamType: The type of the stream that the returned parser should consume.
 ///   - onFailure: A function that is called when the parser fails to produce a diagnostic.
 /// - Returns: An element parser.
-public func parse<Stream>(
-  exactly element: Stream.Element,
-  onFailure: @escaping (Stream) -> Any?) -> ElementParser<Stream>
+public func parser<Stream>(
+  of element: Stream.Element,
+  in streamType: Stream.Type = Stream.self,
+  onFailure: @escaping (Stream) -> Any?)
+  -> ElementParser<Stream>
   where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream
 {
   return ElementParser(element, onFailure: onFailure)
@@ -71,9 +79,14 @@ public struct SequenceParser<Stream, C>: Parser
 
 /// Creates a parser that parses a specific sequence at the beginning of the stream.
 ///
-/// - Parameter sequence: The sequence to parse.
+/// - Parameters:
+///   - sequence: The sequence to parse.
+///   - streamType: The type of the stream that the returned parser should consume.
 /// - Returns: An element parser.
-public func parse<Stream, C>(exactly sequence: C) -> SequenceParser<Stream, C>
+public func parser<Stream, C>(
+  of sequence: C,
+  in streamType: Stream.Type = Stream.self)
+  -> SequenceParser<Stream, C>
   where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream,
         C: Collection, C.Element == Stream.Element
 {
@@ -84,11 +97,14 @@ public func parse<Stream, C>(exactly sequence: C) -> SequenceParser<Stream, C>
 ///
 /// - Parameters:
 ///   - sequence: The sequence to parse.
+///   - streamType: The type of the stream that the returned parser should consume.
 ///   - onFailure: A function that is called when the parser fails to produce a diagnostic.
 /// - Returns: An element parser.
-public func parse<Stream, C>(
-  exactly sequence: C,
-  onFailure: @escaping (Stream) -> Any?) -> SequenceParser<Stream, C>
+public func parser<Stream, C>(
+  of sequence: C,
+  in streamType: Stream.Type = Stream.self,
+  onFailure: @escaping (Stream) -> Any?)
+  -> SequenceParser<Stream, C>
   where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream,
         C: Collection, C.Element == Stream.Element
 {
