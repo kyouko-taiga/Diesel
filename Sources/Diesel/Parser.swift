@@ -79,7 +79,7 @@ public struct ParseError: Error {
 /// A parser that attempts to apply another parser as many times as possible.
 public struct ManyParser<Base>: Parser where Base: Parser {
 
-  let base: Base
+  private let base: Base
 
   public init(_ base: Base) {
     self.base = base
@@ -102,8 +102,8 @@ public struct ManyParser<Base>: Parser where Base: Parser {
 /// A parser that transforms the result of another parser, if the latter is successful.
 public struct TransformParser<Base, Element>: Parser where Base: Parser {
 
-  let base: Base
-  let transform: (Base.Element) -> Element
+  private let base: Base
+  private let transform: (Base.Element) -> Element
 
   public init(_ base: Base, transform: @escaping (Base.Element) -> Element) {
     self.base = base
@@ -126,9 +126,9 @@ public struct CombineParser<First, Second, Element>: Parser
   where First: Parser, Second: Parser, First.Stream == Second.Stream
 {
 
-  let first: First
-  let second: Second
-  let combine: (First.Element, Second.Element) -> Element
+  private let first: First
+  private let second: Second
+  private let combine: (First.Element, Second.Element) -> Element
 
   public init(
     first: First,
@@ -166,8 +166,8 @@ public struct EitherParser<First, Second>: Parser
         First.Stream == Second.Stream, First.Element == Second.Element
 {
 
-  let first: First
-  let second: Second
+  private let first: First
+  private let second: Second
 
   public init(first: First, second: Second) {
     self.first = first
@@ -195,8 +195,8 @@ public struct EitherParser<First, Second>: Parser
 /// A parser that transforms the result of a failed parser.
 public struct CatchParser<Base>: Parser where Base: Parser {
 
-  let base: Base
-  let handler: (ParseError, Base.Stream) -> ParseResult<Base.Element, Base.Stream>
+  private let base: Base
+  private let handler: (ParseError, Base.Stream) -> ParseResult<Base.Element, Base.Stream>
 
   public init(
     _ base: Base,
@@ -221,7 +221,7 @@ public struct CatchParser<Base>: Parser where Base: Parser {
 /// A parser that attempts to apply another parser, or skips the stream if the latter fails.
 public struct OptionalParser<Base>: Parser where Base: Parser {
 
-  let base: Base
+  private let base: Base
 
   public init(_ base: Base) {
     self.base = base
