@@ -354,8 +354,8 @@ extension Parser {
   ///     func letter(_ letter: Character) -> ElementParser<Substring> {
   ///       return parser(of: letter, in: Substring.self)
   ///     }
-  ///     let parser = letter("a").then(letter("b"))
-  ///     print(parser.parse("abc"))
+  ///     let p = letter("a").then(letter("b"))
+  ///     print(p.parse("abc"))
   ///     // Prints `success(("a", "b"), "c")`
   ///
   /// - Parameter parser: A parser for the element to parse next.
@@ -374,8 +374,8 @@ extension Parser {
   ///     func letter(_ letter: Character) -> ElementParser<Substring> {
   ///       return parser(of: letter, in: Substring.self)
   ///     }
-  ///     let parser = letter("a").then(letter("b")) { _, snd in snd }
-  ///     print(parser.parse("abc"))
+  ///     let p = letter("a").then(letter("b")) { _, snd in snd }
+  ///     print(p.parse("abc"))
   ///     // Prints `success("b", "c")`
   ///
   /// - Parameters:
@@ -398,8 +398,8 @@ extension Parser {
   ///     func letter(_ letter: Character) -> ElementParser<Substring> {
   ///       return parser(of: letter, in: Substring.self)
   ///     }
-  ///     let parser = letter("a").else(letter("b"))
-  ///     print(parser.parse("bcd"))
+  ///     let p = letter("a").else(letter("b"))
+  ///     print(p.parse("bcd"))
   ///     // Prints `success("b", "cd")`
   ///
   /// - Parameter parser: A parser to which fall back if this parser fails.
@@ -417,8 +417,8 @@ extension Parser {
   /// of a character string, or produces `_` if it fails:
   ///
   ///     let a = parser(of: Character("a"), in: Substring.self)
-  ///     let parser = a.catch { _, stream in .success("_", stream) }
-  ///     print(parser.parse("bcd"))
+  ///     let p = a.catch { _, stream in .success("_", stream) }
+  ///     print(p.parse("bcd"))
   ///     // Prints `success("_", "bcd")`
   ///
   /// - Parameter handler: A handler to call if the parser fails.
@@ -438,8 +438,8 @@ extension Parser {
   ///     func letter(_ letter: Character) -> ElementParser<Substring> {
   ///       return parser(of: letter, in: Substring.self)
   ///     }
-  ///     let parser = letter("b").surrounded(by: letter("a").many)
-  ///     print(parser.parse("aabccd"))
+  ///     let p = letter("b").surrounded(by: letter("a").many)
+  ///     print(p.parse("aabccd"))
   ///     // Prints `success("b", "ccd")`
   ///
   /// - Parameter parser: A parser for the elements that should surrounds this parser's element.
