@@ -1,7 +1,5 @@
 # Diesel
 
-A Swift library to write parsers for domain specific languages.
-
 Diesel is a Swift library to write recursive descent parsers for domain specific languages (DSLs),
 using parser combinators.
 Like [Parsec](https://hackage.haskell.org/package/parsec) and other similar parser combinator libraries,
@@ -12,7 +10,41 @@ Diesel lets you build sophisticated parsers by combining simpler ones.
 The following is an excerpt from a JSON parser written with Diesel.
 The full sources can be found in `Examples/JSON`.
 
+```swift
+static let null = parser(of: "null", in: Substring.self).map { _ -> JSONElement in .null }
 
+static let number = parser(matching: "-?(?:0|[1-9][0-9]*)(?:\\.[0-9]*)?")
+  .map { value -> JSONElement in .number(Double(value)!) }
+
+private static let stringLiteral = parser(matching: "\"[^\"]*\"")
+  .map { $0.dropFirst().dropLast() }
+
+static let string = stringLiteral.map { value -> JSONElement in .string(String(value)) }
+
+private static let listContent = jsonElement
+  .then(comma.surrounded(by: whitespace.many)
+    .then(jsonElement, combine: { _, rhs in rhs })
+    .many)
+  { [$0] + $1 }
+
+static let list = leftBracket
+  .then(listContent.optional.surrounded(by: whitespace.many)) { _, rhs in rhs ?? [] }
+  .then(rightBracket) { (lhs, _) -> JSONElement in .list(lhs) }
+
+private static let objectElement = stringLiteral
+  .then(colon.surrounded(by: whitespace.many)) { lhs, _ in lhs }
+  .then(jsonElement) { lhs, rhs in JSONObjectElement(key: String(lhs), value: rhs) }
+
+private static let objectContent = objectElement
+  .then(comma.surrounded(by: whitespace.many)
+    .then(objectElement, combine: { _, rhs in rhs })
+    .many)
+  { [$0] + $1 }
+
+static let object = leftBrace
+  .then(objectContent.optional.surrounded(by: whitespace.many)) { _, rhs in rhs ?? [] }
+  .then(rightBrace) { (lhs: [JSONObjectElement], _) -> JSONElement in .object(lhs) }
+```
 
 ## Motivation
 
