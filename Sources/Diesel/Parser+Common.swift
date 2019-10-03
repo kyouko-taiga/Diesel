@@ -115,6 +115,46 @@ public func parser<Stream, C>(
 
 // MARK: String specific extensions
 
+/// Creates a parser that parses one specific character at the beginning of the stream.
+///
+/// - Parameter character: The character to parse.
+/// - Returns: An element parser.
+public func parser(of character: Character) -> ElementParser<Substring> {
+  return ElementParser(character, onFailure: { _ in nil })
+}
+
+/// Creates a parser that parses one specific character at the beginning of the stream.
+///
+/// - Parameters:
+///   - character: The character to parse.
+///   - onFailure: A function that is called when the parser fails to produce a diagnostic.
+/// - Returns: An element parser.
+public func parser(of character: Character, onFailure: @escaping (Substring) -> Any?)
+  -> ElementParser<Substring>
+{
+  return ElementParser(character, onFailure: onFailure)
+}
+
+/// Creates a parser that parses a specific substring at the beginning of the stream.
+///
+/// - Parameter substring: The substring to parse.
+/// - Returns: An element parser.
+public func parser(of substring: String) -> SequenceParser<String, Substring> {
+  return SequenceParser(substring, onFailure: { _ in nil })
+}
+
+/// Creates a parser that parses a specific substring at the beginning of the stream.
+///
+/// - Parameters:
+///   - substring: The substring to parse.
+///   - onFailure: A function that is called when the parser fails to produce a diagnostic.
+/// - Returns: An element parser.
+public func parser(of substring: String, onFailure: @escaping (Substring) -> Any?)
+  -> SequenceParser<String, Substring>
+{
+  return SequenceParser(substring, onFailure: onFailure)
+}
+
 /// A parser that parses regular expressions at the beginning of a substring.
 public struct RegularExpressionParser: Parser {
 
