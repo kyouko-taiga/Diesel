@@ -11,11 +11,27 @@ final class CommonTests: XCTestCase {
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
   }
 
+  func testCharacterParser() {
+    let a = parser(of: Character("a"))
+    assertThat(a.parse("a0"), .succeeded("a", "0"))
+
+    let b = parser(of: Character("b"), onFailure: String.init)
+    assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
+  }
+
   func testSequenceParser() {
     let a = parser(of: "abc", in: Substring.self)
     assertThat(a.parse("abc0"), .succeeded("abc", "0"))
 
     let b = parser(of: "abc", in: Substring.self, onFailure: String.init)
+    assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
+  }
+
+  func testSubstringParser() {
+    let a = parser(of: "abc")
+    assertThat(a.parse("abc0"), .succeeded("abc", "0"))
+
+    let b = parser(of: "abc", onFailure: String.init)
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
   }
 
