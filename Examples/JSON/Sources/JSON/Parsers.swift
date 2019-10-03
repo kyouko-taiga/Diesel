@@ -1,7 +1,7 @@
 import Diesel
 
 func character(_ character: Character) -> ElementParser<Substring> {
-  return parser(of: character, in: Substring.self)
+  return parser(of: character)
 }
 
 enum JSONParser {
@@ -30,7 +30,7 @@ enum JSONParser {
 
   private(set) static var jsonElement = ForwardParser<JSONElement, Substring>()
 
-  static let null = parser(of: "null", in: Substring.self).map { _ -> JSONElement in .null }
+  static let null = parser(of: "null").map { _ -> JSONElement in .null }
 
   static let number = parser(matching: "-?(?:0|[1-9][0-9]*)(?:\\.[0-9]*)?")
     .map { value -> JSONElement in .number(Double(value)!) }
