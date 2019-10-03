@@ -25,6 +25,16 @@ final class ParserTests: XCTestCase {
     assertThat(parser.parse("a00"), .failed())
   }
 
+  func testRepeatParser() {
+    let parser = digit.repeated(count: 2)
+
+    assertThat(parser.parse("")   , .failed())
+    assertThat(parser.parse("000"), .succeeded(["0", "0"], "0"))
+    assertThat(parser.parse("00a"), .succeeded(["0", "0"], "a"))
+    assertThat(parser.parse("0a0"), .failed())
+    assertThat(parser.parse("a00"), .failed())
+  }
+
   func testTransformParser() {
     let parser = digit.map { digit in Int(String(digit))! }
 

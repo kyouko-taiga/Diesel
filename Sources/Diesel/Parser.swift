@@ -100,6 +100,36 @@ public struct ManyParser<Base>: Parser where Base: Parser {
 
 }
 
+/// A parser that attempts to apply another parser for a specific number of times.
+public struct RepeatParser<Base>: Parser where Base: Parser {
+
+  private let base: Base
+  private let count: Int
+
+  public init(_ base: Base, count: Int) {
+    self.base = base
+    self.count = count
+  }
+
+  public func parse(_ stream: Base.Stream) -> ParseResult<[Base.Element], Base.Stream> {
+    var elements: [Base.Element] = []
+    var remainder = stream
+
+    for _ in 0 ..< count {
+      switch base.parse(remainder) {
+      case .success(let newElement, let newRemainder):
+        elements.append(newElement)
+        remainder = newRemainder
+      case .failure(let error):
+        return .failure(error)
+      }
+    }
+
+    return .success(elements, remainder)
+  }
+
+}
+
 /// A parser that transforms the result of another parser, if the latter is successful.
 public struct TransformParser<Base, Element>: Parser where Base: Parser {
 
@@ -302,7 +332,7 @@ extension Parser {
   /// element as many times as possible. The resulting parser is successful even if the element
   /// cannot be parsed once, and produces an empty array.
   ///
-  /// The following example creates a parser that parses sequences of `a` at the beginning of a
+  /// The following example creates a parser that parses sequences of `a`s at the beginning of a
   /// character string, and uses it to parse the prefix of a string:
   ///
   ///     let a = character("a")
@@ -315,16 +345,29 @@ extension Parser {
   /// Wraps this parser within a one or many combinator, resulting in a parser that parses this
   /// parser's element as many times as possible, but at least once.
   ///
-  /// The following example creates a parser that parses sequences of `a` at the beginning of a
+  /// The following example creates a parser that parses sequences of `a`s at the beginning of a
   /// character string, and uses it to parse the prefix of a string:
   ///
   ///     let a = character("a")
   ///     print(a.many.parse("aabbaa"))
   ///     // Prints `success(["a", "a"], "bbaa")`
   ///     print(a.many.parse("bbaa"))
-  ///     // Prints `failure()`
+  ///     // Prints `failure(Diesel.ParseError(diagnostic: nil))`
   public var oneOrMany: CombineParser<Self, ManyParser<Self>, [Self.Element]> {
     return then(self.many) { head, tail in [head] + tail }
+  }
+
+  /// Wraps this parser within a repeat combinator, resulting in a parser that parses this parser's
+  /// element a specific number of times.
+  ///
+  /// The following example creates a parser that parses sequences of two `a`s at the beginning of
+  /// a character string, and uses it to parse the prefix of a string:
+  ///
+  ///     let a = character("a")
+  ///     print(a.repeated(count: 2).parse("aabbaa"))
+  ///     // Prints `success(["a", "a"], "bbaa")`
+  public func repeated(count: Int) -> RepeatParser<Self> {
+    return RepeatParser(self, count: count)
   }
 
   /// Wraps this parser within an optional combinator, resulting in a parser that never fails,
@@ -369,7 +412,8 @@ extension Parser {
   ///
   /// - Parameter parser: A parser for the element to parse next.
   /// - Returns: This and another wrapped within a combine combinator.
-  public func then<P>(_ parser: P) -> CombineParser<Self, P, (Element, P.Element)> where P: Parser {
+  public func then<P>(_ parser: P) -> CombineParser<Self, P, (Element, P.Element)> where P: Parser
+  {
     return CombineParser(first: self, second: parser) { ($0, $1) }
   }
 
