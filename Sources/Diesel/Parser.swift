@@ -305,7 +305,7 @@ extension Parser {
   /// The following example creates a parser that parses sequences of `a` at the beginning of a
   /// character string, and uses it to parse the prefix of a string:
   ///
-  ///     let a = parser(of: Character("a"))
+  ///     let a = character("a")
   ///     print(a.many.parse("aabbaa"))
   ///     // Prints `success(["a", "a"], "bbaa")`
   public var many: ManyParser<Self> {
@@ -318,7 +318,7 @@ extension Parser {
   /// The following example creates a parser that attempts to parse `a` at the beginning of a
   /// character string or skips the input if it cannot:
   ///
-  ///     let a = parser(of: Character("a"))
+  ///     let a = character("a")
   ///     print(a.optional.parse("foo"))
   ///     // Prints `success(nil, "foo")`
   public var optional: OptionalParser<Self> {
@@ -331,11 +331,7 @@ extension Parser {
   /// The following example creates a parser that parses a sequence of digits at the beginning of a
   /// character string and transforms it into an integer if it is successful.
   ///
-  ///     let digit = AnyParser<Substring, Character> { stream in
-  ///       guard let character = stream.first, character.isNumber
-  ///         else { return .error() }
-  ///       return .success(character, stream.dropFirst())
-  ///     }
+  ///     let digit = character { $0.isNumber }
   ///     let integer = digit.many.map { digits in digits.isEmpty? 0 Int(String(digits))! }
   ///     print(integer.parse("123abc"))
   ///     // Prints `success(123, "abc")`
@@ -352,10 +348,7 @@ extension Parser {
   /// The following example creates a parser that parses the letters `a` and `b` at the beginning
   /// of a character string:
   ///
-  ///     func letter(_ letter: Character) -> ElementParser<Substring> {
-  ///       return parser(of: letter)
-  ///     }
-  ///     let p = letter("a").then(letter("b"))
+  ///     let p = character("a").then(character("b"))
   ///     print(p.parse("abc"))
   ///     // Prints `success(("a", "b"), "c")`
   ///
@@ -372,10 +365,7 @@ extension Parser {
   /// results of both parsers should be combined. The following exemple creates a parser that
   /// parses two characters at the beginning of a character string but only keeps the second one:
   ///
-  ///     func letter(_ letter: Character) -> ElementParser<Substring> {
-  ///       return parser(of: letter)
-  ///     }
-  ///     let p = letter("a").then(letter("b")) { _, snd in snd }
+  ///     let p = character("a").then(character("b")) { _, snd in snd }
   ///     print(p.parse("abc"))
   ///     // Prints `success("b", "c")`
   ///
@@ -396,10 +386,7 @@ extension Parser {
   /// The following example creates a parser that attempts to parses `a` at the begining of
   /// character string, and fallsback to parsing a `b` if it fails:
   ///
-  ///     func letter(_ letter: Character) -> ElementParser<Substring> {
-  ///       return parser(of: letter)
-  ///     }
-  ///     let p = letter("a").else(letter("b"))
+  ///     let p = character("a").else(character("b"))
   ///     print(p.parse("bcd"))
   ///     // Prints `success("b", "cd")`
   ///
@@ -417,7 +404,7 @@ extension Parser {
   /// The following example creates a parser that either successfully parses `a` at the beginning
   /// of a character string, or produces `_` if it fails:
   ///
-  ///     let a = parser(of: Character("a"))
+  ///     let a = character("a")
   ///     let p = a.catch { _, stream in .success("_", stream) }
   ///     print(p.parse("bcd"))
   ///     // Prints `success("_", "bcd")`
@@ -436,10 +423,7 @@ extension Parser {
   /// The following example creates a parser that parses `b` surrounded by `a`s at the beginning
   /// of a character string:
   ///
-  ///     func letter(_ letter: Character) -> ElementParser<Substring> {
-  ///       return parser(of: letter)
-  ///     }
-  ///     let p = letter("b").surrounded(by: letter("a").many)
+  ///     let p = character("b").surrounded(by: character("a").many)
   ///     print(p.parse("aabccd"))
   ///     // Prints `success("b", "ccd")`
   ///
