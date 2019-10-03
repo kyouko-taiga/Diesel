@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Diesel",
+        "repositoryURL": "/Users/alvae/Developer/Diesel",
+        "state": {
+          "branch": "master",
+          "revision": "9f94954b0afe368453b20ce4ea70861fed7d5549",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
