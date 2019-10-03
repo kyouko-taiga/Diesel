@@ -1,58 +1,90 @@
 import Foundation
 
-/// A parser that parses one specific element at the beginning of the stream.
+/// A parser that parses one element satisfying a given predicate at the beginning of the stream.
 public struct ElementParser<Stream>: Parser
-  where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream
+  where Stream: Collection, Stream.SubSequence == Stream
 {
 
   public typealias Element = Stream.Element
 
-  private let element: Element
+  private let predicate: (Element) -> Bool
   private let onFailure: (Stream) -> Any?
 
-  public init(_ element: Element, onFailure: @escaping (Stream) -> Any?) {
-    self.element = element
+  public init(predicate: @escaping (Element) -> Bool, onFailure: @escaping (Stream) -> Any?) {
+    self.predicate = predicate
     self.onFailure = onFailure
   }
 
   public func parse(_ stream: Stream) -> ParseResult<Element, Stream> {
-    guard stream.first == element
+    guard let first = stream.first, predicate(first)
       else { return .error(diagnostic: onFailure(stream)) }
-    return .success(element, stream.dropFirst())
+    return .success(first, stream.dropFirst())
   }
 
 }
 
-/// Creates a parser that parses one specific element at the beginning of the stream.
+/// Creates a parser that parses one element satisfying a predicate at the beginning of the stream.
 ///
 /// - Parameters:
-///   - element: The element to parse.
 ///   - streamType: The type of the stream that the returned parser should consume.
+///   - predicate: The predicate to satisfy.
 /// - Returns: An element parser.
 public func parser<Stream>(
-  of element: Stream.Element,
-  in streamType: Stream.Type = Stream.self)
+  in streamType: Stream.Type = Stream.self,
+  satisfying predicate: @escaping (Stream.Element) -> Bool)
   -> ElementParser<Stream>
-  where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream
+  where Stream: Collection, Stream.SubSequence == Stream
 {
-  return ElementParser(element, onFailure: { _ in nil })
+  return ElementParser(predicate: predicate, onFailure: { _ in nil })
+}
+
+/// Creates a parser that parses one element satisfying a predicate at the beginning of the stream.
+///
+/// - Parameters:
+///   - streamType: The type of the stream that the returned parser should consume.
+///   - predicate: The predicate to satisfy.
+///   - onFailure: A function that is called when the parser fails to produce a diagnostic.
+/// - Returns: An element parser.
+public func parser<Stream>(
+  in streamType: Stream.Type = Stream.self,
+  satisfying predicate: @escaping (Stream.Element) -> Bool,
+  onFailure: @escaping (Stream) -> Any?)
+  -> ElementParser<Stream>
+  where Stream: Collection, Stream.SubSequence == Stream
+{
+  return ElementParser(predicate: predicate, onFailure: onFailure)
 }
 
 /// Creates a parser that parses one specific element at the beginning of the stream.
 ///
 /// - Parameters:
-///   - element: The element to parse.
 ///   - streamType: The type of the stream that the returned parser should consume.
+///   - element: The element to parse.
+/// - Returns: An element parser.
+public func parser<Stream>(
+  in streamType: Stream.Type = Stream.self,
+  of element: Stream.Element)
+  -> ElementParser<Stream>
+  where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream
+{
+  return ElementParser(predicate: { $0 == element }, onFailure: { _ in nil })
+}
+
+/// Creates a parser that parses one specific element at the beginning of the stream.
+///
+/// - Parameters:
+///   - streamType: The type of the stream that the returned parser should consume.
+///   - element: The element to parse.
 ///   - onFailure: A function that is called when the parser fails to produce a diagnostic.
 /// - Returns: An element parser.
 public func parser<Stream>(
-  of element: Stream.Element,
   in streamType: Stream.Type = Stream.self,
+  of element: Stream.Element,
   onFailure: @escaping (Stream) -> Any?)
   -> ElementParser<Stream>
   where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream
 {
-  return ElementParser(element, onFailure: onFailure)
+  return ElementParser(predicate: { $0 == element }, onFailure: onFailure)
 }
 
 /// A parser that parses a specific sequence at the beginning of the stream.
@@ -82,12 +114,12 @@ public struct SequenceParser<C, Stream>: Parser
 /// Creates a parser that parses a specific sequence at the beginning of the stream.
 ///
 /// - Parameters:
-///   - sequence: The sequence to parse.
 ///   - streamType: The type of the stream that the returned parser should consume.
+///   - sequence: The sequence to parse.
 /// - Returns: An element parser.
 public func parser<Stream, C>(
-  of sequence: C,
-  in streamType: Stream.Type = Stream.self)
+  in streamType: Stream.Type = Stream.self,
+  of sequence: C)
   -> SequenceParser<C, Stream>
   where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream,
         C: Collection, C.Element == Stream.Element
@@ -98,13 +130,13 @@ public func parser<Stream, C>(
 /// Creates a parser that parses a specific sequence at the beginning of the stream.
 ///
 /// - Parameters:
-///   - sequence: The sequence to parse.
 ///   - streamType: The type of the stream that the returned parser should consume.
+///   - sequence: The sequence to parse.
 ///   - onFailure: A function that is called when the parser fails to produce a diagnostic.
 /// - Returns: An element parser.
 public func parser<Stream, C>(
-  of sequence: C,
   in streamType: Stream.Type = Stream.self,
+  of sequence: C,
   onFailure: @escaping (Stream) -> Any?)
   -> SequenceParser<C, Stream>
   where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream,
@@ -120,7 +152,7 @@ public func parser<Stream, C>(
 /// - Parameter character: The character to parse.
 /// - Returns: An element parser.
 public func parser(of character: Character) -> ElementParser<Substring> {
-  return ElementParser(character, onFailure: { _ in nil })
+  return ElementParser(predicate: { $0 == character }, onFailure: { _ in nil })
 }
 
 /// Creates a parser that parses one specific character at the beginning of the stream.
@@ -132,7 +164,7 @@ public func parser(of character: Character) -> ElementParser<Substring> {
 public func parser(of character: Character, onFailure: @escaping (Substring) -> Any?)
   -> ElementParser<Substring>
 {
-  return ElementParser(character, onFailure: onFailure)
+  return ElementParser(predicate: { $0 == character }, onFailure: onFailure)
 }
 
 /// Creates a parser that parses a specific substring at the beginning of the stream.
