@@ -1,9 +1,5 @@
 import Diesel
 
-func character(_ character: Character) -> ElementParser<Substring> {
-  return parser(of: character)
-}
-
 enum JSONParser {
 
   // MARK: Basic tokens
@@ -14,11 +10,7 @@ enum JSONParser {
   static let rightBracket  = character("]")
   static let colon         = character(":")
   static let comma         = character(",")
-  static let whitespace    = AnyParser<Character, Substring> { stream in
-    guard let character = stream.first, character.isWhitespace
-      else { return .error() }
-    return .success(character, stream.dropFirst())
-  }
+  static let whitespace    = character { $0.isWhitespace }
 
   // MARK: JSON elements
 
@@ -30,12 +22,12 @@ enum JSONParser {
 
   private(set) static var jsonElement = ForwardParser<JSONElement, Substring>()
 
-  static let null = parser(of: "null").map { _ -> JSONElement in .null }
+  static let null = substring("null").map { _ -> JSONElement in .null }
 
-  static let number = parser(matching: "-?(?:0|[1-9][0-9]*)(?:\\.[0-9]*)?")
+  static let number = substring(matching: "-?(?:0|[1-9][0-9]*)(?:\\.[0-9]*)?")
     .map { value -> JSONElement in .number(Double(value)!) }
 
-  private static let stringLiteral = parser(matching: "\"[^\"]*\"")
+  private static let stringLiteral = substring(matching: "\"[^\"]*\"")
     .map { $0.dropFirst().dropLast() }
 
   static let string = stringLiteral.map { value -> JSONElement in .string(String(value)) }
