@@ -3,7 +3,7 @@ import class Foundation.Bundle
 
 import Diesel
 
-final class DieselTests: XCTestCase {
+final class ParserTests: XCTestCase {
 
   func testManyParser() {
     let parser = digit.many
