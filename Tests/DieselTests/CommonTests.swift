@@ -4,10 +4,18 @@ import Diesel
 final class CommonTests: XCTestCase {
 
   func testElementParser() {
-    let a = parser(of: Character("a"), in: Substring.self)
+    let a = parser(in: Substring.self, satisfying: { $0.isNumber })
+    assertThat(a.parse("0a"), .succeeded("0", "a"))
+
+    let b = parser(in: Substring.self, satisfying: { $0.isNumber }, onFailure: String.init)
+    assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
+  }
+
+  func testEquatableElementParser() {
+    let a = parser(in: Substring.self, of: Character("a"))
     assertThat(a.parse("a0"), .succeeded("a", "0"))
 
-    let b = parser(of: Character("b"), in: Substring.self, onFailure: String.init)
+    let b = parser(in: Substring.self, of: Character("b"), onFailure: String.init)
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
   }
 
@@ -19,11 +27,11 @@ final class CommonTests: XCTestCase {
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
   }
 
-  func testSequenceParser() {
-    let a = parser(of: "abc", in: Substring.self)
+  func testEquatableSequenceParser() {
+    let a = parser(in: Substring.self, of: "abc")
     assertThat(a.parse("abc0"), .succeeded("abc", "0"))
 
-    let b = parser(of: "abc", in: Substring.self, onFailure: String.init)
+    let b = parser(in: Substring.self, of: "abc", onFailure: String.init)
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
   }
 
