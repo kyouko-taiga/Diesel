@@ -4,53 +4,53 @@ import Diesel
 final class CommonTests: XCTestCase {
 
   func testElementParser() {
-    let a = parser(in: Substring.self, satisfying: { $0.isNumber })
+    let a = element(in: Substring.self, satisfying: { $0.isNumber })
     assertThat(a.parse("0a"), .succeeded("0", "a"))
 
-    let b = parser(in: Substring.self, satisfying: { $0.isNumber }, onFailure: String.init)
+    let b = element(in: Substring.self, satisfying: { $0.isNumber }, onFailure: String.init)
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
   }
 
   func testEquatableElementParser() {
-    let a = parser(in: Substring.self, of: Character("a"))
+    let a = element(in: Substring.self, equalsTo: Character("a"))
     assertThat(a.parse("a0"), .succeeded("a", "0"))
 
-    let b = parser(in: Substring.self, of: Character("b"), onFailure: String.init)
+    let b = element(in: Substring.self, equalsTo: Character("b"), onFailure: String.init)
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
   }
 
   func testCharacterParser() {
-    let a = parser(of: Character("a"))
+    let a = character("a")
     assertThat(a.parse("a0"), .succeeded("a", "0"))
 
-    let b = parser(of: Character("b"), onFailure: String.init)
+    let b = character("b", onFailure: String.init)
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
   }
 
   func testEquatableSequenceParser() {
-    let a = parser(in: Substring.self, of: "abc")
+    let a = prefix(in: Substring.self, equalsTo: "abc")
     assertThat(a.parse("abc0"), .succeeded("abc", "0"))
 
-    let b = parser(in: Substring.self, of: "abc", onFailure: String.init)
+    let b = prefix(in: Substring.self, equalsTo: "abc", onFailure: String.init)
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
   }
 
   func testSubstringParser() {
-    let a = parser(of: "abc")
+    let a = substring("abc")
     assertThat(a.parse("abc0"), .succeeded("abc", "0"))
 
-    let b = parser(of: "abc", onFailure: String.init)
+    let b = substring("abc", onFailure: String.init)
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
   }
 
   func testRegularExpressionParser() {
-    let a = parser(matching: "[^ ]*\\.swift")
+    let a = substring(matching: "[^ ]*\\.swift")
 
     assertThat(a.parse("abc.swift") , .succeeded("abc.swift", ""))
     assertThat(a.parse("abc.swift "), .succeeded("abc.swift", " "))
     assertThat(a.parse(" abc.swift"), .failed())
 
-    let b = parser(matching: "[^ ]*\\.swift", onFailure: String.init)
+    let b = substring(matching: "[^ ]*\\.swift", onFailure: String.init)
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
   }
 
