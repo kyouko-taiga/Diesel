@@ -1,5 +1,3 @@
-typealias SourceRange = Range<String.Index>
-
 struct Token {
 
   enum Kind {
