@@ -56,7 +56,7 @@ public func parser<Stream>(
 }
 
 /// A parser that parses a specific sequence at the beginning of the stream.
-public struct SequenceParser<Stream, C>: Parser
+public struct SequenceParser<C, Stream>: Parser
   where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream,
         C: Collection, C.Element == Stream.Element
 {
@@ -88,7 +88,7 @@ public struct SequenceParser<Stream, C>: Parser
 public func parser<Stream, C>(
   of sequence: C,
   in streamType: Stream.Type = Stream.self)
-  -> SequenceParser<Stream, C>
+  -> SequenceParser<C, Stream>
   where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream,
         C: Collection, C.Element == Stream.Element
 {
@@ -106,7 +106,7 @@ public func parser<Stream, C>(
   of sequence: C,
   in streamType: Stream.Type = Stream.self,
   onFailure: @escaping (Stream) -> Any?)
-  -> SequenceParser<Stream, C>
+  -> SequenceParser<C, Stream>
   where Stream: Collection, Stream.Element: Equatable, Stream.SubSequence == Stream,
         C: Collection, C.Element == Stream.Element
 {
