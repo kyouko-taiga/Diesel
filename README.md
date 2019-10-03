@@ -7,7 +7,7 @@ Diesel lets you build sophisticated parsers by combining simpler ones.
 
 ## TL;DR;
 
-The following example defines a parser an IPv4 address.
+The following example defines a parser for IPv4 addresses.
 
 ```swift
 // A digit is a character representing a number.
@@ -25,7 +25,7 @@ print(ipv4.parse("192.168.1.1"))
 // Prints `success([192, 168, 1, 1], "")`
 ```
 
-More elaborate examples can be found in `Examples/JSON`.
+More elaborate examples can be found in the `Examples/` folder.
 
 ## Motivation
 
@@ -117,3 +117,17 @@ let parseTwoDigits = parseDigit.then(parseDigit)
 print(parseDigit.parse("123"))
 // Prints `success(("1", "2"), "3")`
 ```
+
+## Installation
+
+Diesel is distributed in the form of a Swift package for [Swift Package Manager](https://swift.org/package-manager/).
+Simply add Diesel as a dependency to your own package and you'll be ready to go.
+There are no other dependencies.
+
+The master branch of Diesel always refers to the latest stable version of the library,
+so using `.branch("master")` guarantees that you'll always pull the latest version.
+See the official documentation of Swift Package Manager for alternative configurations.
+
+## License
+
+Diesel is distributed under the MIT License.
