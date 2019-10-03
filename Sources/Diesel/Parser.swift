@@ -312,6 +312,21 @@ extension Parser {
     return ManyParser(self)
   }
 
+  /// Wraps this parser within a one or many combinator, resulting in a parser that parses this
+  /// parser's element as many times as possible, but at least once.
+  ///
+  /// The following example creates a parser that parses sequences of `a` at the beginning of a
+  /// character string, and uses it to parse the prefix of a string:
+  ///
+  ///     let a = character("a")
+  ///     print(a.many.parse("aabbaa"))
+  ///     // Prints `success(["a", "a"], "bbaa")`
+  ///     print(a.many.parse("bbaa"))
+  ///     // Prints `failure()`
+  public var oneOrMany: CombineParser<Self, ManyParser<Self>, [Self.Element]> {
+    return then(self.many) { head, tail in [head] + tail }
+  }
+
   /// Wraps this parser within an optional combinator, resulting in a parser that never fails,
   /// either successfully parsing this parser's element, or producing `nil`.
   ///

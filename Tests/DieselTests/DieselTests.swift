@@ -15,6 +15,16 @@ final class DieselTests: XCTestCase {
     assertThat(parser.parse("a00"), .succeeded([], "a00"))
   }
 
+  func testOneOrManyParser() {
+    let parser = digit.oneOrMany
+
+    assertThat(parser.parse("")   , .failed())
+    assertThat(parser.parse("000"), .succeeded(["0", "0", "0"], ""))
+    assertThat(parser.parse("00a"), .succeeded(["0", "0"], "a"))
+    assertThat(parser.parse("0a0"), .succeeded(["0"], "a0"))
+    assertThat(parser.parse("a00"), .failed())
+  }
+
   func testTransformParser() {
     let parser = digit.map { digit in Int(String(digit))! }
 
