@@ -149,6 +149,31 @@ public func prefix<Stream, C>(
 
 /// Creates a parser that parses one specific character at the beginning of a substring.
 ///
+/// - Parameters:
+///   - predicate: The predicate to satisfy.
+/// - Returns: An element parser.
+public func character(satisfying predicate: @escaping (Character) -> Bool)
+  -> ElementParser<Substring>
+{
+  return ElementParser(predicate: predicate, onFailure: { _ in nil })
+}
+
+/// Creates a parser that parses one specific character at the beginning of a substring.
+///
+/// - Parameters:
+///   - predicate: The predicate to satisfy.
+///   - onFailure: A function that is called when the parser fails to produce a diagnostic.
+/// - Returns: An element parser.
+public func character(
+  satisfying predicate: @escaping (Character) -> Bool,
+  onFailure: @escaping (Substring) -> Any?)
+  -> ElementParser<Substring>
+{
+  return ElementParser(predicate: predicate, onFailure: onFailure)
+}
+
+/// Creates a parser that parses one specific character at the beginning of a substring.
+///
 /// - Parameter chr: The character to parse.
 /// - Returns: An element parser.
 public func character(_ chr: Character) -> ElementParser<Substring> {

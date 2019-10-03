@@ -20,11 +20,17 @@ final class CommonTests: XCTestCase {
   }
 
   func testCharacterParser() {
-    let a = character("a")
-    assertThat(a.parse("a0"), .succeeded("a", "0"))
+    let a = character(satisfying: { $0.isNumber })
+    assertThat(a.parse("0a"), .succeeded("0", "a"))
 
-    let b = character("b", onFailure: String.init)
+    let b = character(satisfying: { $0.isNumber }, onFailure: String.init)
     assertThat(b.parse("---"), .failed(withDiagnostic: "---"))
+
+    let c = character("a")
+    assertThat(c.parse("a0"), .succeeded("a", "0"))
+
+    let d = character("b", onFailure: String.init)
+    assertThat(d.parse("---"), .failed(withDiagnostic: "---"))
   }
 
   func testEquatableSequenceParser() {
