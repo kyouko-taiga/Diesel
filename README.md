@@ -114,7 +114,7 @@ struct DigitParser: Parser {
 
 let parseDigit = DigitParser()
 let parseTwoDigits = parseDigit.then(parseDigit)
-print(parseDigit.parse("123"))
+print(parseTwoDigits.parse("123"))
 // Prints `success(("1", "2"), "3")`
 ```
 
