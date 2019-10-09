@@ -28,7 +28,7 @@ A parser can be understood as a function of the form `(Stream) -> (Element, Stre
 that attempts to extract a valid output out a a given stream.
 If it succeeds, it returns said output,
 together with an "updated" stream, corresponding to the remainder of the input.
-One advantage of this approach is that is that parsers
+One advantage of this approach is that parsers
 (i.e. parsing higher-order functions)
 can be *combined* to create other parsers.
 
@@ -39,6 +39,8 @@ which requires a method `parse(:)` representing parser.
 For example, the following is a parser for digits.
 
 ```swift
+import Diesel
+
 struct DigitParser: Parser {
 
   func parse(_ stream: Substring) -> ParseResult<Character, Substring> {
@@ -231,6 +233,9 @@ For instance, the following is an equivalent definition of `int`:
 let int = character("-").optional.then(nat, combine: { sign, val in
   sign.map { String($0) + val } ?? val
 })
+
+print(int.parse("123"))
+// Prints `success("123", "")`
 ```
 
 ### Parsing with Regular Expression
