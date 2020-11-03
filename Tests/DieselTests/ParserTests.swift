@@ -43,6 +43,22 @@ final class ParserTests: XCTestCase {
     assertThat(parser.parse("0"), .succeeded(0, ""))
   }
 
+  func testFallibleTransformParser() {
+    struct ZeroError: Error {
+    }
+
+    let parser = digit.map { (digit) -> Int in
+      guard digit != "0"
+        else { throw ZeroError() }
+      return Int(String(digit))!
+    }
+
+    assertThat(parser.parse("") , .failed())
+    assertThat(parser.parse("a"), .failed())
+    assertThat(parser.parse("0"), .failed())
+    assertThat(parser.parse("1"), .succeeded(1, ""))
+  }
+
   func testCombineParser() {
     let parser = digit.then(digit).map { String([$0.0, $0.1]) }
 
