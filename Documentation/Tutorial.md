@@ -182,7 +182,7 @@ print(int.parse("123"))
 // Prints `success((nil, ["1", "2", "3"]), "")``
 ```
 
-### Parsing Floating Point Numbers
+### Parsing Floats
 
 The last step is to parse floating point numbers.
 We can't simply combine two instances of our integer parser though,
@@ -242,9 +242,10 @@ print(int.parse("123"))
 
 [Regular expressions](https://en.wikipedia.org/wiki/Regular_expression)
 enthusiasts may think this whole definition is cumbersome.
-While regular expressions should not be abused, as they often tend to become unreadable,
+While regular expressions should not be abused, as they tend to quickly become unreadable,
 they have their use cases.
 Hence, Diesel comes with helpers to write parsers backed by regular expressions.
+
 For instance, the following illustrates a alternative definition of the `float` parser,
 using a regular expression:
 
@@ -252,4 +253,32 @@ using a regular expression:
 let float = substring(matching: "-?(?:[0-9]+)(?:\\.[0-9]+)?")
 print(float.parse("-4.2"))
 // Prints `success("-4.2", "")`
+```
+
+## Parsing Arithmetic Expressions
+
+In the previous chapter, we wrote a parser for numbers.
+Let's continue our journey with a parser for arithmetic expressions,
+like for instance `-1 + 4.2 * 4`.
+
+### Parsing Operators
+
+Fuel only supports basic arithmetic operators, namely `+`, `-`, `*`, `/` and `%`.
+Each of these can be individually parsed with a character parser.
+Note however that we'll transform each parser's result,
+so that it produces a member of an enumeration representing these operators.
+This will allow us to attach some information to them later on.
+
+```swift
+enum InfixOperator: Character {
+  case add = "+"
+  case sub = "-"
+  case mul = "*"
+  case div = "/"
+  case mod = "%"
+
+  func parser() -> some Parser
+}
+
+let infixOperator =
 ```
