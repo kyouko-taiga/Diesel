@@ -68,7 +68,7 @@ final class ParserTests: XCTestCase {
   }
 
   func testEitherParser() {
-    let parser = letter("a").else(letter("b"))
+    let parser = letter("a").or(letter("b"))
 
     assertThat(parser.parse("") , .failed())
     assertThat(parser.parse("0"), .failed())

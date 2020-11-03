@@ -451,12 +451,19 @@ extension Parser {
   /// The following example creates a parser that attempts to parses `a` at the begining of
   /// character string, and fallsback to parsing a `b` if it fails:
   ///
-  ///     let p = character("a").else(character("b"))
+  ///     let p = character("a").or(character("b"))
   ///     print(p.parse("bcd"))
   ///     // Prints `success("b", "cd")`
   ///
   /// - Parameter parser: A parser to which fall back if this parser fails.
   /// - Returns: This parser and another wrapped within a combine combinator.
+  public func `or`<P>(_ parser: P) -> EitherParser<Self, P>
+    where P: Parser, P.Stream == Stream, P.Element == Element
+  {
+    return EitherParser(first: self, second: parser)
+  }
+
+  @available(*, deprecated, renamed: "or")
   public func `else`<P>(_ parser: P) -> EitherParser<Self, P>
     where P: Parser, P.Stream == Stream, P.Element == Element
   {
