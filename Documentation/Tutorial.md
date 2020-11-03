@@ -267,18 +267,19 @@ Fuel only supports basic arithmetic operators, namely `+`, `-`, `*`, `/` and `%`
 Each of these can be individually parsed with a character parser.
 Note however that we'll transform each parser's result,
 so that it produces a member of an enumeration representing these operators.
-This will allow us to attach some information to them later on.
 
 ```swift
-enum InfixOperator: Character {
+enum InfixOperator: Character, CaseIterable {
+
   case add = "+"
   case sub = "-"
   case mul = "*"
   case div = "/"
   case mod = "%"
 
-  func parser() -> some Parser
-}
+  var parser: TransformParser<ElementParser<Substring>, InfixOperator> {
+    return character(rawValue).map { InfixOperator(rawValue: $0)! }
+  }
 
-let infixOperator =
+}
 ```
