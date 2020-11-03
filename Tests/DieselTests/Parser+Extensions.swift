@@ -30,9 +30,7 @@ extension Assertion where Subject: ParseResultRepresentable {
 
   static func failed() -> Assertion<Subject> {
     return Assertion { result in
-      guard let extractedFailure = result.extractFailure()
-        else { return false }
-      return extractedFailure.diagnostic == nil
+      return result.extractFailure() != nil
     }
   }
 
