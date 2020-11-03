@@ -134,9 +134,9 @@ public struct RepeatParser<Base>: Parser where Base: Parser {
 public struct TransformParser<Base, Element>: Parser where Base: Parser {
 
   private let base: Base
-  private let transform: (Base.Element) -> Element
+  private let transform: (Base.Element) throws -> Element
 
-  public init(_ base: Base, transform: @escaping (Base.Element) -> Element) {
+  public init(_ base: Base, transform: @escaping (Base.Element) throws -> Element) {
     self.base = base
     self.transform = transform
   }
@@ -144,7 +144,13 @@ public struct TransformParser<Base, Element>: Parser where Base: Parser {
   public func parse(_ stream: Base.Stream) -> ParseResult<Element, Base.Stream> {
     switch base.parse(stream) {
     case .success(let output, let remainder):
-      return .success(transform(output), remainder)
+      do {
+        return .success(try transform(output), remainder)
+      } catch let error as ParseError {
+        return .failure(error)
+      } catch {
+        return .error(diagnostic: error)
+      }
     case .failure(let error):
       return .failure(error)
     }
@@ -396,7 +402,7 @@ extension Parser {
   ///
   /// - Parameter transform: A transform function.
   /// - Returns: This parser wrapped within a transform combinator.
-  public func map<R>(_ transform: @escaping (Element) -> R) -> TransformParser<Self, R> {
+  public func map<R>(_ transform: @escaping (Element) throws -> R) -> TransformParser<Self, R> {
     return TransformParser(self, transform: transform)
   }
 
